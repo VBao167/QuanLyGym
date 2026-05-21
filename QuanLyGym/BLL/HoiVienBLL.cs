@@ -5,24 +5,26 @@ using System.Text;
 using System.Threading.Tasks;
 using QuanLyGym.DAL;
 using QuanLyGym.DTO;
-using System.Data;
+
 namespace QuanLyGym.BLL
 {
     public class HoiVienBLL
     {
         HoiVienDAL dal = new HoiVienDAL();
 
+        // Lấy toàn bộ danh sách hội viên
         public List<HoiVienDTO> GetAll()
         {
             return dal.GetAllHoiVien();
         }
 
+        // Thêm mới hội viên
         public string Insert(HoiVienDTO hv)
         {
             if (string.IsNullOrWhiteSpace(hv.MaHV) || string.IsNullOrWhiteSpace(hv.TenHV))
                 return "Vui lòng nhập đầy đủ Mã và Tên Hội Viên!";
 
-            if (hv.Sdt.Length < 10)
+            if (string.IsNullOrWhiteSpace(hv.Sdt) || hv.Sdt.Length < 10)
                 return "Số điện thoại không hợp lệ!";
 
             if (dal.InsertHoiVien(hv))
@@ -31,6 +33,7 @@ namespace QuanLyGym.BLL
                 return "Lỗi khi thêm vào cơ sở dữ liệu!";
         }
 
+        // Cập nhật hội viên
         public string Update(HoiVienDTO hv)
         {
             if (string.IsNullOrWhiteSpace(hv.MaHV) || string.IsNullOrWhiteSpace(hv.TenHV))
@@ -42,12 +45,12 @@ namespace QuanLyGym.BLL
                 return "Lỗi khi cập nhật cơ sở dữ liệu!";
         }
 
+        // Xóa hội viên
         public string Delete(string maHV)
         {
             if (string.IsNullOrWhiteSpace(maHV))
                 return "Vui lòng chọn hội viên cần xóa!";
 
-            // Lưu ý: Thực tế nếu HV có hợp đồng thì không được xóa (vướng khóa ngoại)
             try
             {
                 if (dal.DeleteHoiVien(maHV))
