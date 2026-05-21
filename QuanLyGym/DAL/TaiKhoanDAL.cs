@@ -16,7 +16,7 @@ namespace QuanLyGym.DAL
         public string CheckLogin(string username, string password)
         {
             string quyenHan = "";
-            string query = string.Format("SELECT QuyenHan FROM TaiKhoan WHERE TenDangNhap = '{0}' AND MatKhau = '{1}' AND TrangThai = N'Hoạt động'", username, password);
+            string query = string.Format("SELECT QuyenHan FROM TaiKhoan WHERE TenDangNhap = '{0}' AND MatKhau = '{1}' AND TrangThai = N'1'", username, password);
 
             DataTable dt = db.ExecuteQuery(query);
             if (dt.Rows.Count > 0)

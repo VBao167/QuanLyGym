@@ -11,7 +11,7 @@ namespace QuanLyGym.DAL
     public class DatabaseConnection
     {
         // Nhớ đổi tên Server cho đúng với máy của bạn
-        private readonly string connectionString = @"Data Source=Ideapad-3;Initial Catalog=GymManagementSystem;Integrated Security=True";
+        private readonly string connectionString = @"Data Source=IDEAPAD-3;Initial Catalog=GymManagementSystem;Integrated Security=True";
 
         public SqlConnection GetConnection()
         {

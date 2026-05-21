@@ -49,6 +49,7 @@
     <Compile Include="BLL\GoiTapGymBLL.cs" />
     <Compile Include="BLL\HoiVienBLL.cs" />
     <Compile Include="BLL\HopDongBLL.cs" />
+    <Compile Include="BLL\NhanVienBLL.cs" />
     <Compile Include="BLL\TaiKhoanBLL.cs" />
     <Compile Include="DAL\DatabaseConnection.cs" />
     <Compile Include="DAL\GoiTapGymDAL.cs" />
@@ -86,6 +87,12 @@
     <Compile Include="UserControls\UCHopDong.Designer.cs">
       <DependentUpon>UCHopDong.cs</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\UCNhanVien.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\UCNhanVien.Designer.cs">
+      <DependentUpon>UCNhanVien.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Formmain.resx">
       <DependentUpon>Formmain.cs</DependentUpon>
     </EmbeddedResource>
@@ -106,6 +113,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UserControls\UCHopDong.resx">
       <DependentUpon>UCHopDong.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\UCNhanVien.resx">
+      <DependentUpon>UCNhanVien.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

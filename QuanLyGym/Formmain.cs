@@ -40,7 +40,8 @@ namespace QuanLyGym
 
         private void btnNhanVien_Click(object sender, EventArgs e)
         {
-            
+            UCNhanVien uc = new UCNhanVien();
+            TargetControlToPanel(uc);
         }
 
         private void btnThietBi_Click(object sender, EventArgs e)
