@@ -4,47 +4,107 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using QuanLyGym.DTO;
-using System.Data;
+using QuanLyGym.Models;
 
 namespace QuanLyGym.DAL
 {
     public class NhanVienDAL
     {
-        DatabaseConnection db = new DatabaseConnection();
+        private GymManagementSystemContext _context;
+
+        public NhanVienDAL()
+        {
+            _context = new GymManagementSystemContext();
+        }
 
         // 1. Lấy toàn bộ danh sách nhân viên
-        public DataTable GetAllNhanVien()
+        public List<NhanVienDTO> GetAllNhanVien()
         {
-            // Đã xóa cột GioiTinh vì NhanVien không có
-            string query = "SELECT MaNV, TenNV, Sdt, ChucVu FROM NhanVien";
-            return db.ExecuteQuery(query);
+            try
+            {
+                var list = _context.NhanViens
+                    .Select(nv => new NhanVienDTO
+                    {
+                        MaNV = nv.MaNv,
+                        TenNV = nv.TenNv,
+                        Sdt = nv.Sdt,
+                        ChucVu = nv.ChucVu
+                    })
+                    .ToList();
+                return list;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi GetAllNhanVien: {ex.Message}");
+                return new List<NhanVienDTO>();
+            }
         }
 
         // 2. Thêm mới nhân viên
         public bool InsertNhanVien(NhanVienDTO NV)
         {
-            // Đã fix lỗi thiếu dấu nháy đơn ở phần '{2}'
-            string query = string.Format(
-                "INSERT INTO NhanVien (MaNV, TenNV, Sdt, ChucVu) VALUES ('{0}', N'{1}', '{2}', N'{3}')",
-                NV.MaNV, NV.TenNV, NV.Sdt, NV.ChucVu);
-            return db.ExecuteNonQuery(query) > 0;
+            try
+            {
+                var nhanVien = new NhanVien
+                {
+                    MaNv = NV.MaNV,
+                    TenNv = NV.TenNV,
+                    Sdt = NV.Sdt,
+                    ChucVu = NV.ChucVu
+                };
+                _context.NhanViens.Add(nhanVien);
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi InsertNhanVien: {ex.Message}");
+                return false;
+            }
         }
 
         // 3. Cập nhật thông tin nhân viên
         public bool UpdateNhanVien(NhanVienDTO NV)
         {
-            // Đã sắp xếp lại đúng thứ tự tham số {0}, {1}, {2}, {3}
-            string query = string.Format(
-                "UPDATE NhanVien SET TenNV = N'{1}', Sdt = '{2}', ChucVu = N'{3}' WHERE MaNV = '{0}'",
-                NV.MaNV, NV.TenNV, NV.Sdt, NV.ChucVu);
-            return db.ExecuteNonQuery(query) > 0;
+            try
+            {
+                var nhanVien = _context.NhanViens.FirstOrDefault(n => n.MaNv == NV.MaNV);
+                if (nhanVien == null)
+                    return false;
+
+                nhanVien.TenNv = NV.TenNV;
+                nhanVien.Sdt = NV.Sdt;
+                nhanVien.ChucVu = NV.ChucVu;
+
+                _context.NhanViens.Update(nhanVien);
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi UpdateNhanVien: {ex.Message}");
+                return false;
+            }
         }
 
         // 4. Xóa nhân viên
         public bool DeleteNhanVien(string MaNV)
         {
-            string query = string.Format("DELETE FROM NhanVien WHERE MaNV = '{0}'", MaNV);
-            return db.ExecuteNonQuery(query) > 0;
+            try
+            {
+                var nhanVien = _context.NhanViens.FirstOrDefault(n => n.MaNv == MaNV);
+                if (nhanVien == null)
+                    return false;
+
+                _context.NhanViens.Remove(nhanVien);
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi DeleteNhanVien: {ex.Message}");
+                return false;
+            }
         }
     }
 }

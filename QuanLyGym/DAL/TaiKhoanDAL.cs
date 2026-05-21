@@ -4,26 +4,40 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Data.SqlClient;
+using QuanLyGym.Models;
 
 namespace QuanLyGym.DAL
 {
     public class TaiKhoanDAL
     {
-        DatabaseConnection db = new DatabaseConnection();
+        private GymManagementSystemContext _context;
+
+        public TaiKhoanDAL()
+        {
+            _context = new GymManagementSystemContext();
+        }
 
         // Hàm kiểm tra đăng nhập và trả về Quyền Hạn (Admin, Sale, PT...)
         public string CheckLogin(string username, string password)
         {
-            string quyenHan = "";
-            string query = string.Format("SELECT QuyenHan FROM TaiKhoan WHERE TenDangNhap = '{0}' AND MatKhau = '{1}' AND TrangThai = N'1'", username, password);
-
-            DataTable dt = db.ExecuteQuery(query);
-            if (dt.Rows.Count > 0)
+            try
             {
-                quyenHan = dt.Rows[0]["QuyenHan"].ToString();
+                var taiKhoan = _context.TaiKhoans
+                    .FirstOrDefault(tk => tk.TenDangNhap == username && 
+                                          tk.MatKhau == password && 
+                                          tk.TrangThai == true);
+
+                if (taiKhoan != null)
+                {
+                    return taiKhoan.QuyenHan;
+                }
+                return ""; // Nếu sai tài khoản/mật khẩu hoặc trạng thái không hoạt động, trả về chuỗi rỗng
             }
-            return quyenHan; // Nếu sai tài khoản/mật khẩu, chuỗi này sẽ rỗng
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi CheckLogin: {ex.Message}");
+                return "";
+            }
         }
     }
 }

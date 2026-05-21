@@ -12,7 +12,7 @@ namespace QuanLyGym.BLL
     {
         HoiVienDAL dal = new HoiVienDAL();
 
-        public DataTable GetAll()
+        public List<HoiVienDTO> GetAll()
         {
             return dal.GetAllHoiVien();
         }

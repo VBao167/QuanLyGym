@@ -13,7 +13,7 @@ namespace QuanLyGym.BLL
     {
         GoiTapGymDAL dal = new GoiTapGymDAL();
 
-        public DataTable GetAll()
+        public List<GoiTapGymDTO> GetAll()
         {
             return dal.GetAllGoiTap();
         }

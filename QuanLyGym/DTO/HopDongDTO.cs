@@ -10,9 +10,12 @@ namespace QuanLyGym.DTO
     {
         public string MaHopDong { get; set; }
         public string MaHV { get; set; }
+        public string TenHV { get; set; }
         public string MaGoi { get; set; }
+        public string TenGoi { get; set; }
         public string MaNV { get; set; }
-        public DateTime NgayLap { get; set; }
+        public string TenNV { get; set; }
+        public DateTime? NgayLap { get; set; }
         public string NoiDung { get; set; }
         public string MaKM { get; set; }
         public HopDongDTO() { }

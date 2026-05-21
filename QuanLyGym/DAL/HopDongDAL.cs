@@ -5,66 +5,119 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data;
 using QuanLyGym.DTO;
-using System.Data.SqlClient; 
+using QuanLyGym.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace QuanLyGym.DAL
 {
     public class HopDongDAL
     {
-        DatabaseConnection db = new DatabaseConnection();
+        private GymManagementSystemContext _context;
+
+        public HopDongDAL()
+        {
+            _context = new GymManagementSystemContext();
+        }
 
         // 1. Lấy danh sách Hợp Đồng (Kèm theo Tên thay vì chỉ hiển thị Mã)
-        public DataTable GetAllHopDong()
+        public List<HopDongDTO> GetAllHopDong()
         {
-            string query = @"
-                SELECT 
-                    HD.MaHopDong, 
-                    HV.TenHV, 
-                    GT.TenGoi, 
-                    NV.TenNV, 
-                    HD.NgayLap, 
-                    HD.NoiDung, 
-                    HD.MaKM
-                FROM HopDong HD
-                JOIN HoiVien HV ON HD.MaHV = HV.MaHV
-                JOIN GoiTapGym GT ON HD.MaGoi = GT.MaGoi
-                JOIN NhanVien NV ON HD.MaNV = NV.MaNV";
-            return db.ExecuteQuery(query);
+            try
+            {
+                var list = _context.HopDongs
+                    .Include("MaHvNavigation")
+                    .Include("MaGoiNavigation")
+                    .Include("MaNvNavigation")
+                    .Select(hd => new HopDongDTO
+                    {
+                        MaHopDong = hd.MaHd,
+                        MaHV = hd.MaHv,
+                        TenHV = hd.MaHvNavigation.TenHv,
+                        MaGoi = hd.MaGoi,
+                        TenGoi = hd.MaGoiNavigation.TenGoi,
+                        MaNV = hd.MaNv,
+                        TenNV = hd.MaNvNavigation.TenNv,
+                        NgayLap = hd.NgayLap,
+                        NoiDung = hd.NoiDung,
+                        MaKM = hd.MaHoaDon
+                    })
+                    .ToList();
+                return list;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi GetAllHopDong: {ex.Message}");
+                return new List<HopDongDTO>();
+            }
         }
 
         // 2. Thêm Hợp Đồng mới
         public bool InsertHopDong(HopDongDTO hd)
         {
-            // Xử lý trường hợp MaKM hoặc NoiDung có thể rỗng
-            string maKM = string.IsNullOrEmpty(hd.MaKM) ? "NULL" : $"'{hd.MaKM}'";
-            string noiDung = string.IsNullOrEmpty(hd.NoiDung) ? "NULL" : $"N'{hd.NoiDung}'";
-
-            string query = string.Format(
-                "INSERT INTO HopDong (MaHopDong, MaHV, MaGoi, MaNV, NgayLap, NoiDung, MaKM) " +
-                "VALUES ('{0}', '{1}', '{2}', '{3}', '{4:yyyy-MM-dd HH:mm:ss}', {5}, {6})",
-                hd.MaHopDong, hd.MaHV, hd.MaGoi, hd.MaNV, hd.NgayLap, noiDung, maKM);
-
-            return db.ExecuteNonQuery(query) > 0;
+            try
+            {
+                var hopDong = new HopDong
+                {
+                    MaHd = hd.MaHopDong,
+                    MaHv = hd.MaHV,
+                    MaGoi = hd.MaGoi,
+                    MaNv = hd.MaNV,
+                    NgayLap = hd.NgayLap,
+                    NoiDung = hd.NoiDung,
+                    MaHoaDon = string.IsNullOrEmpty(hd.MaKM) ? null : hd.MaKM
+                };
+                _context.HopDongs.Add(hopDong);
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi InsertHopDong: {ex.Message}");
+                return false;
+            }
         }
 
         // 3. Cập nhật Hợp Đồng (Thường chỉ cho phép sửa nội dung hoặc mã khuyến mãi)
         public bool UpdateHopDong(HopDongDTO hd)
         {
-            string maKM = string.IsNullOrEmpty(hd.MaKM) ? "NULL" : $"'{hd.MaKM}'";
-            string noiDung = string.IsNullOrEmpty(hd.NoiDung) ? "NULL" : $"N'{hd.NoiDung}'";
+            try
+            {
+                var hopDong = _context.HopDongs.FirstOrDefault(h => h.MaHd == hd.MaHopDong);
+                if (hopDong == null)
+                    return false;
 
-            string query = string.Format(
-                "UPDATE HopDong SET NoiDung = {1}, MaKM = {2} WHERE MaHopDong = '{0}'",
-                hd.MaHopDong, noiDung, maKM);
+                hopDong.NoiDung = hd.NoiDung;
+                hopDong.MaHoaDon = string.IsNullOrEmpty(hd.MaKM) ? null : hd.MaKM;
 
-            return db.ExecuteNonQuery(query) > 0;
+                _context.HopDongs.Update(hopDong);
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi UpdateHopDong: {ex.Message}");
+                return false;
+            }
         }
 
         // 4. Xóa Hợp Đồng
         public bool DeleteHopDong(string maHD)
         {
-            string query = string.Format("DELETE FROM HopDong WHERE MaHopDong = '{0}'", maHD);
-            return db.ExecuteNonQuery(query) > 0;
+            try
+            {
+                var hopDong = _context.HopDongs.FirstOrDefault(h => h.MaHd == maHD);
+                if (hopDong == null)
+                    return false;
+
+                _context.HopDongs.Remove(hopDong);
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi DeleteHopDong: {ex.Message}");
+                return false;
+            }
         }
     }
 }

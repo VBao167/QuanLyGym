@@ -13,7 +13,7 @@ namespace QuanLyGym.BLL
     {
         HopDongDAL dal = new HopDongDAL();
 
-        public DataTable GetAll()
+        public List<HopDongDTO> GetAll()
         {
             return dal.GetAllHopDong();
         }
@@ -30,7 +30,7 @@ namespace QuanLyGym.BLL
             }
 
             // Gán ngày lập mặc định là thời điểm hiện tại nếu chưa có
-            if (hd.NgayLap == DateTime.MinValue)
+            if (hd.NgayLap == null || hd.NgayLap == DateTime.MinValue)
             {
                 hd.NgayLap = DateTime.Now;
             }

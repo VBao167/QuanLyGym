@@ -13,7 +13,7 @@ namespace QuanLyGym.BLL
     {
         NhanVienDAL dal = new NhanVienDAL();
 
-        public DataTable GetAllNhanVien()
+        public List<NhanVienDTO> GetAllNhanVien()
         {
             return dal.GetAllNhanVien();
         }

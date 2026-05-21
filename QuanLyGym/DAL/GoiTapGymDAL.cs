@@ -4,42 +4,106 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using QuanLyGym.DTO;
-using System.Data;
+using QuanLyGym.Models;
 
 namespace QuanLyGym.DAL
 {
     public class GoiTapGymDAL
     {
-        DatabaseConnection db = new DatabaseConnection();
+        private GymManagementSystemContext _context;
 
-        public DataTable GetAllGoiTap()
+        public GoiTapGymDAL()
         {
-            string query = "SELECT MaGoi, TenGoi, DonGia, ThoiHan, MaKM FROM GoiTapGym";
-            return db.ExecuteQuery(query);
+            _context = new GymManagementSystemContext();
+        }
+
+        public List<GoiTapGymDTO> GetAllGoiTap()
+        {
+            try
+            {
+                var list = _context.GoiTapGyms
+                    .Select(gt => new GoiTapGymDTO
+                    {
+                        MaGoi = gt.MaGoi,
+                        TenGoi = gt.TenGoi,
+                        DonGia = gt.DonGia.HasValue ? gt.DonGia.Value : 0,
+                        ThoiHan = gt.ThoiHan.HasValue ? gt.ThoiHan.Value : 0,
+                        MaKM = gt.MaKm
+                    })
+                    .ToList();
+                return list;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi GetAllGoiTap: {ex.Message}");
+                return new List<GoiTapGymDTO>();
+            }
         }
 
         public bool InsertGoiTap(GoiTapGymDTO gt)
         {
-            string query = string.Format(
-                "INSERT INTO GoiTapGym (MaGoi, TenGoi, DonGia, ThoiHan, MaKM) VALUES ('{0}', N'{1}', {2}, {3}, {4})",
-                gt.MaGoi, gt.TenGoi, gt.DonGia, gt.ThoiHan,
-                string.IsNullOrEmpty(gt.MaKM) ? "NULL" : $"'{gt.MaKM}'");
-            return db.ExecuteNonQuery(query) > 0;
+            try
+            {
+                var goiTap = new GoiTapGym
+                {
+                    MaGoi = gt.MaGoi,
+                    TenGoi = gt.TenGoi,
+                    DonGia = gt.DonGia,
+                    ThoiHan = gt.ThoiHan,
+                    MaKm = string.IsNullOrEmpty(gt.MaKM) ? null : gt.MaKM
+                };
+                _context.GoiTapGyms.Add(goiTap);
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi InsertGoiTap: {ex.Message}");
+                return false;
+            }
         }
 
         public bool UpdateGoiTap(GoiTapGymDTO gt)
         {
-            string query = string.Format(
-                "UPDATE GoiTapGym SET TenGoi = N'{1}', DonGia = {2}, ThoiHan = {3}, MaKM = {4} WHERE MaGoi = '{0}'",
-                gt.MaGoi, gt.TenGoi, gt.DonGia, gt.ThoiHan,
-                string.IsNullOrEmpty(gt.MaKM) ? "NULL" : $"'{gt.MaKM}'");
-            return db.ExecuteNonQuery(query) > 0;
+            try
+            {
+                var goiTap = _context.GoiTapGyms.FirstOrDefault(g => g.MaGoi == gt.MaGoi);
+                if (goiTap == null)
+                    return false;
+
+                goiTap.TenGoi = gt.TenGoi;
+                goiTap.DonGia = gt.DonGia;
+                goiTap.ThoiHan = gt.ThoiHan;
+                goiTap.MaKm = string.IsNullOrEmpty(gt.MaKM) ? null : gt.MaKM;
+
+                _context.GoiTapGyms.Update(goiTap);
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi UpdateGoiTap: {ex.Message}");
+                return false;
+            }
         }
 
         public bool DeleteGoiTap(string maGoi)
         {
-            string query = string.Format("DELETE FROM GoiTapGym WHERE MaGoi = '{0}'", maGoi);
-            return db.ExecuteNonQuery(query) > 0;
+            try
+            {
+                var goiTap = _context.GoiTapGyms.FirstOrDefault(g => g.MaGoi == maGoi);
+                if (goiTap == null)
+                    return false;
+
+                _context.GoiTapGyms.Remove(goiTap);
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi DeleteGoiTap: {ex.Message}");
+                return false;
+            }
         }
     }
 }
